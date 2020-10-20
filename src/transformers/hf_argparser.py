@@ -125,20 +125,20 @@ class HfArgumentParser(ArgumentParser):
             if args_filename:
                 args_file = Path(args_filename)
             else:
-                args_file = Path(sys.argv[0]).with_suffix(".args")
+                args_file = Path(sys.argv[0]).with_suffix(".args") #替换结尾
 
             if args_file.exists():
                 fargs = args_file.read_text().split()
                 args = fargs + args if args is not None else fargs + sys.argv[1:]
                 # in case of duplicate arguments the first one has precedence
                 # so we append rather than prepend.
-        namespace, remaining_args = self.parse_known_args(args=args)
+        namespace, remaining_args = self.parse_known_args(args=args)# 参数导入，剩余
         outputs = []
         for dtype in self.dataclass_types:
             keys = {f.name for f in dataclasses.fields(dtype)}
             inputs = {k: v for k, v in vars(namespace).items() if k in keys}
             for k in keys:
-                delattr(namespace, k)
+                delattr(namespace, k) # 删除namespace中的k属性
             obj = dtype(**inputs)
             outputs.append(obj)
         if len(namespace.__dict__) > 0:

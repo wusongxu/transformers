@@ -15,7 +15,7 @@
 # limitations under the License.
 
 try:
-    from sklearn.metrics import f1_score, matthews_corrcoef
+    from sklearn.metrics import f1_score, matthews_corrcoef, precision_score, recall_score, classification_report
 
     from scipy.stats import pearsonr, spearmanr
 
@@ -33,14 +33,43 @@ if _has_sklearn:
     def simple_accuracy(preds, labels):
         return (preds == labels).mean()
 
+
+    # def acc_and_f1(preds, labels):
+    #     acc = simple_accuracy(preds, labels)
+    #     f1 = f1_score(y_true=labels, y_pred=preds)
+    #     return {
+    #         "acc": acc,
+    #         "f1": f1,
+    #         "acc_and_f1": (acc + f1) / 2,
+    #     }
     def acc_and_f1(preds, labels):
-        acc = simple_accuracy(preds, labels)
-        f1 = f1_score(y_true=labels, y_pred=preds)
+        precision_macro = precision_score(labels, preds, average='macro')
+        precision_micro = precision_score(labels, preds, average='micro')
+        precision_weighted = precision_score(labels, preds, average='weighted')
+
+        recall_macro = recall_score(labels, preds, average='macro')
+        recall_micro = recall_score(labels, preds, average='micro')
+        recall_weighted = recall_score(labels, preds, average='weighted')
+
+        f1_macro = f1_score(y_true=labels, y_pred=preds, average='macro')
+        f1_micro = f1_score(y_true=labels, y_pred=preds, average='micro')
+        f1_weighted = f1_score(y_true=labels, y_pred=preds, average='weighted')
+
+        report = classification_report(y_true=labels, y_pred=preds)
+
         return {
-            "acc": acc,
-            "f1": f1,
-            "acc_and_f1": (acc + f1) / 2,
+            'precision_macro': precision_macro,
+            'precision_micro': precision_micro,
+            'precision_weighted': precision_weighted,
+            'recall_macro': recall_macro,
+            'recall_micro': recall_micro,
+            'recall_weighted': recall_weighted,
+            'f1_macro': f1_macro,
+            'f1_micro': f1_micro,
+            'f1_weighted': f1_weighted,
+            'report': report
         }
+
 
     def pearson_and_spearman(preds, labels):
         pearson_corr = pearsonr(preds, labels)[0]
@@ -50,6 +79,7 @@ if _has_sklearn:
             "spearmanr": spearman_corr,
             "corr": (pearson_corr + spearman_corr) / 2,
         }
+
 
     def glue_compute_metrics(task_name, preds, labels):
         assert len(preds) == len(
@@ -77,8 +107,11 @@ if _has_sklearn:
             return {"acc": simple_accuracy(preds, labels)}
         elif task_name == "hans":
             return {"acc": simple_accuracy(preds, labels)}
+        elif task_name == "qianniu":
+            return acc_and_f1(preds, labels)
         else:
             raise KeyError(task_name)
+
 
     def xnli_compute_metrics(task_name, preds, labels):
         assert len(preds) == len(

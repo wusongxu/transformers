@@ -42,7 +42,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,3,6"
 
 logger = logging.getLogger(__name__)
 
@@ -148,10 +148,8 @@ def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
     # We now keep distinct sets of args, for a cleaner separation of concerns.
-
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-
     if data_args.eval_data_file is None and training_args.do_eval:
         raise ValueError(
             "Cannot do evaluation without an evaluation data file. Either supply a file to --eval_data_file "
